@@ -35,8 +35,9 @@ def stargal():
         for atm in range(1,100):
 
             ## name your work and output dirs. This allows many jobs to run simultaneously without their working files bumping into each other on the disk. 
-            workdir = "work_"+typ+"_"+sensor+"_atm"+str(atm)
-            outdir = "output_"+typ+"_"+sensor+"_atm"+str(atm)
+            ## make sure you put in the full path to the directories, not the relative path. 
+            workdir = "/path/to/ImageSimulationRecipes/python/recipes/work_"+typ+"_"+sensor+"_atm"+str(atm)
+            outdir = "/path/to/ImageSimulationRecipes/python/recipes/output_"+typ+"_"+sensor+"_atm"+str(atm)
 
 
             ## point out what we're doing
@@ -45,9 +46,7 @@ def stargal():
             ## check whether the work and output dirs exist. If so, empty them. If not, make them. phosim will fail if they don't exist. 
             if os.path.exists(workdir):
                 filelist = os.listdir(workdir)
-                if len(filelist)==0:
-                    os.rmdir(workdir)
-                else:
+                if len(filelist)!=0:
                     for afile in filelist:
                         os.remove(workdir+"/"+afile)
             else:
@@ -55,9 +54,7 @@ def stargal():
 
             if os.path.exists(outdir):
                 filelist = os.listdir(outdir)
-                if len(filelist)==0:
-                    os.rmdir(outdir)
-                else:
+                if len(filelist)!=0:
                     for afile in filelist:
                         os.remove(outdir+"/"+afile)
             else:

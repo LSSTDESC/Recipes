@@ -4,6 +4,8 @@ Image Simulation Recipes
 A collection of working example scripts for generating simulated LSST images
 given basic inputs, with docstrings interpreted by Sphinx.
 
+*[Click here!](http://www.slac.stanford.edu/~pjm/ImageSimulationRecipes)*
+
 ### Building docs
 
 Install sphinx:

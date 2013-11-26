@@ -51,7 +51,8 @@ clean:
 	rm -rf $(BUILDDIR)/*
 
 html:
-	$(SPHINXAPIDOC) -o . ../python/recipes
+	$(SPHINXAPIDOC) -f -o . ../python/recipes
+	$(SPHINXAPIDOC) -f -o . ../python/utensils
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

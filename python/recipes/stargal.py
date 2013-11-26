@@ -5,7 +5,7 @@ We simulate one chip over 100 different realisations of the atmosphere. No dithe
 """
 # ============================================================================
 
-import subprocess, time, os, sys, random, math
+import subprocess, time, os
 
 
 def stargal():
@@ -13,7 +13,7 @@ def stargal():
     ## We want to run phosim for both stars and galaxies. 
     for typ in ['msstars', 'bdgals']:
         ## the input catalogue files are in this directory. 
-        catfile = "stargal-"+typ+".dat"
+        catfile = "stargal-"+typ+".pars"
 
         ## the data in the input catalogues provided cover this chip.
         ## format: R is the raft coordinate
@@ -88,7 +88,10 @@ def stargal():
             subcmd = ["./phosim", newcatfilename,  "-c", "examples/nobackground", "-s", sensor, "-w", workdir, "-o", outdir]
 
             ## To run it interactively on the slac batch system, you need to specify the architecture to be rhel60. This uses the xlong queue; if you have bright stars you may need xxl. You can probably get away with the long queue as-is. 
-            subcmd = ["bsub", "-q", "xlong", "-o", workdir+"/log.log", "-R", "rhel60", "./phosim", newcatfilename,  "-c", "examples/nobackground", "-s", sensor, "-w", workdir, "-o", outdir]
+            ## note that this also uses the slac installation of phosim. 
+            ## SLAC-specific setup: if you haven't already, you will need to load the LSST environment via: source /afs/slac/g/lsst/software/redhat6-x86_64-64bit-gcc44/DMstack/Winter2013-v6_2/loadLSST.csh
+            ## You may also run into problems with a specific environmental variable that you shoudl unset via: unsetenv LS_COLORS
+            #subcmd = ["bsub", "-q", "xlong", "-o", workdir+"/log.log", "-R", "rhel60", "python", "/afs/slac/g/lsst/software/redhat6-x86_64-64bit-gcc44/phoSim/phosim-3.3.2/phosim.py", newcatfilename,  "-c", "examples/nobackground", "-s", sensor, "-w", workdir, "-o", outdir]
 
             subprocess.call(subcmd)
 

@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>recipes.stargal &mdash; ImageSimulationRecipes 0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="ImageSimulationRecipes 0.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ImageSimulationRecipes 0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for recipes.stargal</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Aim: To enable simple tests of star/galaxy separation algorithms. </span>
+<span class="sd">+</span>
+<span class="sd">Summary: To test algorithms for separating stars and galaxies, we will simulate separate images of fields of stars and galaxies using exactly the same atmosphere/optics for each set of images. We are effectively simulating the sky with only the stars, and then the same sky with only the galaxies. </span>
+<span class="sd">We simulate one chip over 100 different realisations of the atmosphere. No dithering or rotation of the camera is applied - the only thing changing between the 100 realisations is the atmosphere and seeing. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c"># ============================================================================</span>
+
+<span class="kn">import</span> <span class="nn">subprocess</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">os</span>
+
+
+<div class="viewcode-block" id="stargal"><a class="viewcode-back" href="../../recipes.html#recipes.stargal.stargal">[docs]</a><span class="k">def</span> <span class="nf">stargal</span><span class="p">():</span>
+
+    <span class="c">## We want to run phosim for both stars and galaxies. </span>
+    <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;msstars&#39;</span><span class="p">,</span> <span class="s">&#39;bdgals&#39;</span><span class="p">]:</span>
+        <span class="c">## the input catalogue files are in this directory. </span>
+        <span class="n">catfile</span> <span class="o">=</span> <span class="s">&quot;stargal-&quot;</span><span class="o">+</span><span class="n">typ</span><span class="o">+</span><span class="s">&quot;.pars&quot;</span>
+
+        <span class="c">## the data in the input catalogues provided cover this chip.</span>
+        <span class="c">## format: R is the raft coordinate</span>
+        <span class="c">## S is the sensor coordinate</span>
+        <span class="c">## this is the center raft (22), and the top center chip (21). </span>
+        <span class="n">sensor</span> <span class="o">=</span> <span class="s">&quot;R22_S21&quot;</span> 
+
+
+        <span class="c">## get seeing and seeds for the 100 atmospheric realisations.</span>
+        <span class="c">## these were generated from opsim, and exist in a dat file in this directory. </span>
+        <span class="n">seeings</span><span class="p">,</span> <span class="n">seeds</span>  <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">aline</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;stargal-atmos.dat&quot;</span><span class="p">,</span><span class="s">&quot;r&quot;</span><span class="p">):</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="n">aline</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">seeds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">seeings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+
+        <span class="c">## loop over the 100 atmospheric realisations. </span>
+        <span class="k">for</span> <span class="n">atm</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">):</span>
+
+            <span class="c">## name your work and output dirs. This allows many jobs to run simultaneously without their working files bumping into each other on the disk. </span>
+            <span class="c">## make sure you put in the full path to the directories, not the relative path. </span>
+            <span class="n">workdir</span> <span class="o">=</span> <span class="s">&quot;/path/to/ImageSimulationRecipes/python/recipes/work_&quot;</span><span class="o">+</span><span class="n">typ</span><span class="o">+</span><span class="s">&quot;_&quot;</span><span class="o">+</span><span class="n">sensor</span><span class="o">+</span><span class="s">&quot;_atm&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">atm</span><span class="p">)</span>
+            <span class="n">outdir</span> <span class="o">=</span> <span class="s">&quot;/path/to/ImageSimulationRecipes/python/recipes/output_&quot;</span><span class="o">+</span><span class="n">typ</span><span class="o">+</span><span class="s">&quot;_&quot;</span><span class="o">+</span><span class="n">sensor</span><span class="o">+</span><span class="s">&quot;_atm&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">atm</span><span class="p">)</span>
+
+
+            <span class="c">## point out what we&#39;re doing</span>
+            <span class="k">print</span> <span class="s">&quot;running phosim over&quot;</span><span class="p">,</span> <span class="n">typ</span><span class="p">,</span> <span class="s">&quot;for atmosphere realisation&quot;</span><span class="p">,</span> <span class="n">atm</span>
+
+            <span class="c">## check whether the work and output dirs exist. If so, empty them. If not, make them. phosim will fail if they don&#39;t exist. </span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">workdir</span><span class="p">):</span>
+                <span class="n">filelist</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">workdir</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filelist</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">afile</span> <span class="ow">in</span> <span class="n">filelist</span><span class="p">:</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">workdir</span><span class="o">+</span><span class="s">&quot;/&quot;</span><span class="o">+</span><span class="n">afile</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">workdir</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">outdir</span><span class="p">):</span>
+                <span class="n">filelist</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">outdir</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filelist</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">afile</span> <span class="ow">in</span> <span class="n">filelist</span><span class="p">:</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">outdir</span><span class="o">+</span><span class="s">&quot;/&quot;</span><span class="o">+</span><span class="n">afile</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">outdir</span><span class="p">)</span>
+
+
+            <span class="c">## write out a new catalogue file to your workdir.</span>
+            <span class="c">## this will contain the same objects as the orginal catalogue, and the same pointing/rotation angle etc, but will have new random seed and seeing parameters. </span>
+            <span class="n">newcatfilename</span> <span class="o">=</span> <span class="n">workdir</span><span class="o">+</span><span class="s">&quot;/cat-&quot;</span><span class="o">+</span><span class="n">typ</span><span class="o">+</span><span class="s">&quot;-atm&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">atm</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;.dat&quot;</span>
+            <span class="n">newcatfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">newcatfilename</span><span class="p">,</span><span class="s">&quot;w&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">aline</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">catfile</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s">&quot;SIM_SEED&quot;</span> <span class="ow">in</span> <span class="n">aline</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="o">&gt;&gt;</span> <span class="n">newcatfile</span><span class="p">,</span> <span class="s">&quot;SIM_SEED&quot;</span><span class="p">,</span> <span class="n">seeds</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">atm</span><span class="p">)]</span>
+                <span class="k">elif</span> <span class="s">&quot;Opsim_rawseeing&quot;</span> <span class="ow">in</span> <span class="n">aline</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="o">&gt;&gt;</span> <span class="n">newcatfile</span><span class="p">,</span> <span class="s">&quot;Opsim_rawseeing&quot;</span><span class="p">,</span> <span class="n">seeings</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">atm</span><span class="p">)]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="o">&gt;&gt;</span> <span class="n">newcatfile</span><span class="p">,</span> <span class="n">aline</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>                
+            <span class="n">newcatfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+
+
+            <span class="c">## now you&#39;re all set! Run phosim over this catalogue file.</span>
+            <span class="c">## there are many options here depending on your setup/needs.</span>
+            <span class="c">## Not that here we specify the configuration file for no sky backgroud</span>
+
+            <span class="c">## To run it interactively from your phosim installation directory:</span>
+            <span class="n">subcmd</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;./phosim&quot;</span><span class="p">,</span> <span class="n">newcatfilename</span><span class="p">,</span>  <span class="s">&quot;-c&quot;</span><span class="p">,</span> <span class="s">&quot;examples/nobackground&quot;</span><span class="p">,</span> <span class="s">&quot;-s&quot;</span><span class="p">,</span> <span class="n">sensor</span><span class="p">,</span> <span class="s">&quot;-w&quot;</span><span class="p">,</span> <span class="n">workdir</span><span class="p">,</span> <span class="s">&quot;-o&quot;</span><span class="p">,</span> <span class="n">outdir</span><span class="p">]</span>
+
+            <span class="c">## To run it interactively on the slac batch system, you need to specify the architecture to be rhel60. This uses the xlong queue; if you have bright stars you may need xxl. You can probably get away with the long queue as-is. </span>
+            <span class="c">## note that this also uses the slac installation of phosim. </span>
+            <span class="c">## SLAC-specific setup: if you haven&#39;t already, you will need to load the LSST environment via: source /afs/slac/g/lsst/software/redhat6-x86_64-64bit-gcc44/DMstack/Winter2013-v6_2/loadLSST.csh</span>
+            <span class="c">## You may also run into problems with a specific environmental variable that you shoudl unset via: unsetenv LS_COLORS</span>
+            <span class="c">#subcmd = [&quot;bsub&quot;, &quot;-q&quot;, &quot;xlong&quot;, &quot;-o&quot;, workdir+&quot;/log.log&quot;, &quot;-R&quot;, &quot;rhel60&quot;, &quot;python&quot;, &quot;/afs/slac/g/lsst/software/redhat6-x86_64-64bit-gcc44/phoSim/phosim-3.3.2/phosim.py&quot;, newcatfilename,  &quot;-c&quot;, &quot;examples/nobackground&quot;, &quot;-s&quot;, sensor, &quot;-w&quot;, workdir, &quot;-o&quot;, outdir]</span>
+
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">subcmd</span><span class="p">)</span>
+
+            <span class="c">## you may want to pause between jobs, especially if you&#39;re submitting them to a batch system. </span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c"># ============================================================================</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="n">stargal</span><span class="p">()</span>
+
+<span class="c"># ============================================================================</span>
+
+    
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ImageSimulationRecipes 0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Bard, Boutigny, Chiang, Digel, Dubois &amp; Marshall.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

@@ -3,14 +3,16 @@ import os
 import sys
 import shutil
 
-def makedir(path, replace=True):
+def makedir(path, replace=True, query=True):
     """Create a directory path, replacing existing path if desired."""
     try:
         os.makedirs(path)
     except OSError:
-        sys.stdout.write("About to replace %s, deleting its contents.  Proceed? [Y/n] " % path)
-        response = sys.stdin.readline().strip()
-        if response in ('', 'y', 'Y'):
+        if query:
+            sys.stdout.write("About to replace %s, deleting its contents.  Proceed? [Y/n] " % path)
+            response = sys.stdin.readline().strip()
+        if not query or response in ('', 'y', 'Y'):
+            print "Replacing existing", path
             shutil.rmtree(path)
         else:
             return

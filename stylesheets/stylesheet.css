@@ -161,7 +161,13 @@ a.button span {
 #view-on-github span {
   background: transparent url(../images/octocat-icon.png) 12px 50% no-repeat;
 }
-#view-on-github {
+#browse span {
+  background: transparent url(../images/browse.png) 12px 50% no-repeat;
+}
+#email span {
+  background: transparent url(../images/email.png) 12px 50% no-repeat;
+}
+#email {
   margin-right: 0;
 }
 

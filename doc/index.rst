@@ -16,6 +16,13 @@ Contents:
 
 ==================
 
+.. toctree::
+   :maxdepth: 2
+
+   recipe_for_a_recipe
+
+==================
+
 * :ref:`genindex`
 * :ref:`search`
 

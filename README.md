@@ -17,13 +17,16 @@ Make the html pages, in situ:
     cd doc
     make html
 
-_dev team: you should make the html in the gh-pages branch, so you can push it to the project website:
+_dev team: you should make the html in the gh-pages branch, so you can push 
+it to the project website:_
 
     git fetch origin
     git checkout gh-pages
+    git merge master
+    
     cd doc
     make html
-    
+
 
 
 ### Authors, License etc

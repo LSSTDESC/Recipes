@@ -4,7 +4,13 @@ Image Simulation Recipes
 A collection of working example scripts for generating simulated LSST images
 given basic inputs, with docstrings interpreted by Sphinx.
 
-__[Website](http://darkenergysciencecollaboration.github.io/ImageSimulationRecipes)__
+__[GitHub pages website](http://darkenergysciencecollaboration.github.io/ImageSimulationRecipes)__
+
+
+A less up-to-date, but better formatted version can be viewed here:
+
+__[Phil's website at SLAC](http://www.slac.stanford.edu/~pjm/ImageSimulationRecipes)__
+
 
 ### Building docs
 

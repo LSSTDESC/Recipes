@@ -1,5 +1,6 @@
 """
 Aim: To enable simple tests of star/galaxy separation algorithms. 
+
 Summary: To test algorithms for separating stars and galaxies, we will simulate separate images of fields of stars and galaxies using exactly the same atmosphere/optics for each set of images. We are effectively simulating the sky with only the stars, and then the same sky with only the galaxies. 
 We simulate one chip over 100 different realisations of the atmosphere. No dithering or rotation of the camera is applied - the only thing changing between the 100 realisations is the atmosphere and seeing. 
 """

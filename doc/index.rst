@@ -9,12 +9,11 @@ Welcome to Image Simulation Recipes
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
-   stargal
+   recipes
+   utensils
 
-
-Indices and tables
 ==================
 
 * :ref:`genindex`

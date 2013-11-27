@@ -4,6 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
+SPHINXAPIDOC  = sphinx-apidoc
 PAPER         =
 BUILDDIR      = .build
 
@@ -50,6 +51,8 @@ clean:
 	rm -rf $(BUILDDIR)/*
 
 html:
+	$(SPHINXAPIDOC) -f -o . ../python/recipes
+	$(SPHINXAPIDOC) -f -o . ../python/utensils
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

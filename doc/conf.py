@@ -49,7 +49,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'ImageSimulationRecipes'
+project = u'Image Simulation Recipes'
 copyright = u'2013, Bard, Boutigny, Chiang, Digel, Dubois & Marshall'
 
 # The version info for the project you're documenting, acts as replacement for

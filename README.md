@@ -12,10 +12,18 @@ Install sphinx:
 
     pip install sphinx
     
-Make the html pages:
+Make the html pages, in situ:
  
     cd doc
     make html
+
+_Dev team:_ you should make the html in the gh-pages branch, so you can push it to the project website:
+
+    git fetch origin
+    git checkout gh-pages
+    cd doc
+    make html
+    
 
 
 ### Authors, License etc

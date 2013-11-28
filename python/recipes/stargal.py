@@ -21,6 +21,7 @@ changing between the 100 realisations is the atmosphere and seeing.
 # ======================================================================
 
 import subprocess, time, os
+import utensils
 
 # ======================================================================
 
@@ -76,22 +77,8 @@ def stargal():
             # empty them. If not, make them. phosim will fail if they 
             # don't exist. 
             
-            if os.path.exists(workdir):
-                filelist = os.listdir(workdir)
-                if len(filelist)!=0:
-                    for afile in filelist:
-                        os.remove(workdir+"/"+afile)
-            else:
-                os.mkdir(workdir)
-
-            if os.path.exists(outdir):
-                filelist = os.listdir(outdir)
-                if len(filelist)!=0:
-                    for afile in filelist:
-                        os.remove(outdir+"/"+afile)
-            else:
-                os.mkdir(outdir)
-
+            utensils.makedir(workdir, replace=True, query=False)
+            utensils.makedir(outdir, replace=True, query=False)
 
             # Write out a new catalogue file to your workdir.
             # This will contain the same objects as the orginal 

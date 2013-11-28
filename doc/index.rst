@@ -28,8 +28,3 @@ please follow the recipe for writing a good recipe at the link below.
 
    recipe_for_a_recipe
 
-==================
-
-* :ref:`genindex`
-* :ref:`search`
-

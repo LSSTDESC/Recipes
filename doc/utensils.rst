@@ -4,6 +4,14 @@ utensils package
 Submodules
 ----------
 
+utensils.knife_kit module
+-------------------------
+
+.. automodule:: utensils.knife_kit
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 utensils.persistence module
 ---------------------------
 

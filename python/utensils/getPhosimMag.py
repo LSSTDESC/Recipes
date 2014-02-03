@@ -1,3 +1,21 @@
+"""
+AIM:
+====
+To obtain the fiducial magnitude of an object in a phoSim input catalog
+
+Summary:
+========
+CatSim produces (and PhoSim requires) object magnitudes defined at 
+500nm AB magnitude. This script converts this quantity into the more
+usual observed magnitde in LSST filter bands. It uses the filter 
+throughput curves, taken by default from the LSST trac web repository. 
+
+
+"""
+
+
+
+
 import numpy as np
 import gzip, bz2
 from utensils import phot

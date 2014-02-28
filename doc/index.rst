@@ -17,6 +17,9 @@ You can browse the recipes and admire our utensils by following the links below.
    recipes
    utensils
 
+Coming soon: DM recipes! In the meantime, check out http://ls.st.o8r for the
+DM team's LSST Software Users Guide. 
+
 ==================
 
 Like any good cook, you'll want to adapt our recipes for your own needs. 

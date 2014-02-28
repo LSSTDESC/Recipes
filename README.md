@@ -6,6 +6,11 @@ given basic inputs, with docstrings interpreted by Sphinx.
 
 __[GitHub pages website](http://darkenergysciencecollaboration.github.io/ImageSimulationRecipes)__
 
+### Help with Recipes
+
+If you have a question about how to do something with LSST data, and you can't find a recipe for it, please ask your how-to question at __[the LSST questions board](https://confluence.lsstcorp.org/questions)__ (coming soon!).
+
+If you have a comment or question about an existing recipe, you can submit it as an __[issue](https://github.com/DarkEnergyScienceCollaboration/ImageSimulationRecipes/issues)__ . Thanks!
 
 ### Building docs
 

@@ -2,7 +2,11 @@
 Utensils for slicing, dicing, trimming, and otherwise prepping
 ingredients to the simulations.
 """
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    from OrderedDict import OrderedDict
+
 
 class PhosimParameters(OrderedDict):
     """

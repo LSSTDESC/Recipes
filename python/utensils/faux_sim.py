@@ -172,7 +172,7 @@ def checkPaths(opt, phosimDir):
     opt.imageDir = os.path.join(opt.output_dir, 'image', 'data')
 
     for x in ['outputDir', 'workDir', 'binDir', 'dataDir', 'sedDir',
-              'imageDir', 'extraCommands']:
+              'imageDir']:
          my_path = os.path.abspath(opt.__dict__[x])
          opt.__dict__[x] = my_path
          if not os.path.exists(my_path) and x != 'extraCommands':

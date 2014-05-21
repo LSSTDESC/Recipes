@@ -45,7 +45,10 @@ import subprocess
 import sys, glob, optparse, shutil
 import distutils.spawn
 import multiprocessing
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    from OrderedDict import OrderedDict
 
 _opsim_mapping = OrderedDict([
         ("Opsim_moonra", "moonra"),

@@ -5,15 +5,15 @@ import shutil
 
 def makedir(path, replace=True, query=True):
     """Create a directory path, replacing existing path if desired."""
-    try:
-        os.makedirs(path)
-    except OSError:
+    if os.path.exists(path):
+        if not replace:
+            return
         if query:
-            sys.stdout.write("About to replace %s, deleting its contents.  Proceed? [Y/n] " % path)
+            sys.stdout.write("About to delete %s. Proceed? [Y/n] " % path)
             response = sys.stdin.readline().strip()
         if not query or response in ('', 'y', 'Y'):
             print "Replacing existing", path
             shutil.rmtree(path)
         else:
             return
-        os.makedirs(path)
+    os.makedirs(path)

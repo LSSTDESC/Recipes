@@ -21,13 +21,12 @@ reduced catalog.
 
 ## you'll need utensils in your $PYTHONPATH
 import utensils
-import getPhosimMag
 import subprocess
 import urllib
 
 # ======================================================================
 
-def simFaintStars():
+def selectFaintStars():
 
     ## we'll use the catalog file containing main sequence stars 
     ## from the star/gal example. 
@@ -38,7 +37,10 @@ def simFaintStars():
     # You'll need to add the full path to wherever you keep the SED files.
     # These can be downloaded via this command: 
     # curl -O http://lsst-web.ncsa.illinois.edu/lsstdata/summer2012/SEDs/SEDs.tar.gz
-    path_to_SEDs = '/path/to/SED/data/' 
+    path_to_SEDs = '/path/to/data/SED/'
+
+    # If phosim is not in your PATH, edit this line to point to it. 
+    phosim_path = "/path/to/phosim/installation/" 
 
     # getPhosimMag need the filter throughput curves. If unspecified, 
     # getPhosimMag will download it from the website *every time* it's called. 
@@ -76,8 +78,7 @@ def simFaintStars():
             int_Rv = float(cols[15])
             
             # Run the utensil to obtain the r-band magnitudes
-            mag = getPhosimMag.getPhosimMag(lsst_filter, mag_norm, sed, redshift, int_dust, int_Av, int_Rv)
-
+            mag = utensils.getPhosimMag(lsst_filter, mag_norm, sed, redshift, int_dust, int_Av, int_Rv)
             # Let's discard all stars brighter than 16th mag (which is roughly when saturation occurs in an LSST CCD)
             if mag<16:
                 continue
@@ -95,13 +96,11 @@ def simFaintStars():
     utensils.makedir(workdir, replace=True, query=False)
     utensils.makedir(outdir, replace=True, query=False)
 
-    # We only have stars that fall in raft 22, CCD 21. 
-    # Specifying this saves some time in teh execution so that 
+    # We have stars in this catalog that fall on raft 22, CCD 21. 
+    # Specifying this saves some time in the execution so that 
     # phosim doesn't look for objects anywhere else. 
-    sensor = 'R22_S22' 
+    sensor = 'R22_S21' 
     
-    # If phosim is not in your PATH, edit this line to point to it. 
-    phosim_path = "/path/to/phosim/installation/"
     # And run phosim over this new file. Note that we've specified 
     # no sky background, to speed things up. 
     subcmd = ['python', phosim_path+"phosim.py", newcatfilename,  "-c", phosim_path+"examples/nobackground", "-s", sensor, "-w", workdir, "-o", outdir]
@@ -115,6 +114,6 @@ def simFaintStars():
 if __name__ == '__main__':
 
                                
-    simFaintStars()
+    selectFaintStars()
 
 # ======================================================================

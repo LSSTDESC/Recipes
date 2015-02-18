@@ -12,57 +12,123 @@ This recipe uses those methods to process an image file. Note that you will
 This example works with V10.0 of the stack. 
 Note that the DM stack will struggle with a zero-background image. 
 
+
 """
 
 # ==========================================
 
 ## you'll need to source your loadLSST.csh file
 ## also make sure you've run: setup pipe_tasks -t v10_0
+import sys
+import numpy as np
 
-try:
-    from lsst.meas.algorithms import SourceDetectionTask, estimateBackground
-    import lsst.afw.table as afwTable
-    import lsst.afw.image
-    import lsst.afw.detection
-    from lsst.meas.algorithms.detection import SourceDetectionTask
-    from lsst.meas.base import SingleFrameMeasurementTask
-    import lsst.afw.display.ds9 as ds9
-    
-except:
-    raise KeyError("you don't have the LSST stack! Try another method")
-return None
+from lsst.meas.algorithms import SourceDetectionTask, estimateBackground
+import lsst.afw.table as afwTable
+import lsst.afw.image
+import lsst.afw.detection
+from lsst.meas.algorithms.detection import SourceDetectionTask
+from lsst.meas.algorithms.measurement import SourceMeasurementTask
+from lsst.meas.base import SingleFrameMeasurementTask
+from lsst.pipe.tasks.measurePsf import MeasurePsfTask
+import lsst.afw.display.ds9 as ds9
+import lsst.afw.display.utils as displayUtils
+import lsst.afw.detection as afwDetection
+import lsst.afw.geom as afwGeom
+import lsst.afw.image as afwImage
+import lsst.afw.math as afwMath
 
 # ==========================================
 
 def detectAndMeasureWithDM():
 
     ### what file are you going to look at? This should be in fits format.
-    ### the test image provided is a grid of stars, an 'eimage' (i.e. contains
-    ### no chip effects) produced by phosim. 
-    imagefile = "test_image.fits"
+    ### The test image included in this example contains stars and galaxies in the center only. 
+    imagefile = "test_image_stars_gals.fits"
     
     ### open the file in the stack format
     exp = lsst.afw.image.ExposureF(imagefile)
+    im = exp.getMaskedImage()
+
+    ### display the original image
+    frame = 0
+    ds9.mtv(exp, frame=frame, title="Original Image"); frame+=1
+
+    ### Subtract background. 
+    ### To do this, we'll set up a grid of 64x64 pixel areas across th eimage
+    ### Fit the second moment of the pixels in each (which should be bg-dominated) and a fit a smooth function
+    ### Subtract this function. 
+    print "** subtracting background"
+    back_size = 256 ## dunno what this is
+    back_ctrl = afwMath.BackgroundControl(im.getWidth()//back_size+1, im.getHeight()//back_size +1)
+    back_obj = afwMath.makeBackground(im, back_ctrl)
+    im -=back_obj.getImageF("LINEAR")
+    ds9.mtv(exp, frame=frame, title="Background removed"); frame+=1
+
+    ### set up schema
+    schema = afwTable.SourceTable.makeMinimalSchema()
+    #schema.setVersion(0) ## bug fix: agile DM-1750
+
     
+    ### Set up a source detection task
+    print "** detection task"
+    config = SourceDetectionTask.ConfigClass()
+    config.reEstimateBackground = False ## We've already done this
+    detectionTask = SourceDetectionTask(config=config, schema=schema)
 
-    ### pixel size = 0.2" for LSST
-    pix_size = 0.2
+
+
+
+    ### Set up a source measurement task
+    config = SingleFrameMeasurementTask.ConfigClass()
+    ## minimum plugins
+    config.plugins.names.clear()
+    #for plugin in ["base_SdssShape", "base_CircularApertureFlux", "base_GaussianFlux"]: ## SdssCentroid needs a PSF, which we don't have (we're trying to get it!)
+    #    config.plugins.names.add(plugin)
+
+    #config.plugins["base_CircularApertureFlux"].radii = [7.0]
+    config.slots.psfFlux =  None ##"base_CircularApertureFlux" # use of PSF flux is hardcoded in secondMomentStarSelector
+    measureTask = SingleFrameMeasurementTask(schema=schema, config=config)
+
+
+    ### run things. 
+    print "** detect sources"
+    #cat = afwTable.SourceCatalog(schema)
+    table = afwTable.SourceTable.make(schema)
+    sources = detectionTask.run(table, exp, sigma=2).sources
+
+    print "** measure sources"
+    measureTask.run(sources, exp)
+
+
+
+
+
+    ## apply star selection algo
+    #print "** apply star selection"
+    #config = MeasurePsfTask.ConfigClass()
+
+    #starSelector = config.starSelector.apply()
+    #starSelector.config.badFlags = ["flags.pixel.edge", "flags.pixel.cr.center", "flags.pixel.interpolated.center", "flags.pixel.saturated.center"]
+
+
+    #psfDeterminer = config.psfDeterminer.apply()
+    #psfDeterminer.config.sizeCellX = 128 ## cell sizes in which we average over to get PSF fit
+    #psfDeterminer.config.sizeCellY = 128
+    #psfDeterminer.config.spatialOrder = 1
+    #psfDeterminer.config.nEigenComponents = 3 ## you might want to play with these to get a better fit. 
+    #measurePsfTask = MeasurePsfTask(config=config, schema=schema)
+
+    print "** measure PSF"
+    #result = measurePsfTask.run(exp, sources)
     
-    ### median LSST seeing is ~0.7"
-    seeing = 0.7
+    ### now look at the PSF
+    #psf = result.psf
+    #cellSet = result.cellSet
+    #psfIm = psf.computeImage()
+    #ds9.mtv(psfIm, frame = frame, title = "Psf Image"); frame+=1
 
-    ### convert seeing FWHM into sigma
-    sigma = pix_size * seeing * 2.354
 
-    ### PSF postage stamp size
-    stamp_size = 51
-
-    ### Make a toy PSF for the image. 
-    ### sigma is important here, needs to be roughly the correct size. 
-    ### the first two arguments define the size of the postage stamp
-    psf = lsst.afw.detection.GaussianPsf(stamp_size, stamp_size, sigma)
-    exp.setPsf(psf)
-
+    """
     
     ### Set variance of the image.
     ### It's fairly safe to set the variance equal to the image variance. 
@@ -116,7 +182,7 @@ def detectAndMeasureWithDM():
         adaptiveMoment = record.getAdaptiveMoments() #Returns an afw::geom::ellipses object corresponding to xx, yy, xy
         adaptiveMomentErr = record.getAdaptiveMoments()  #Return the 3x3 symmetric covariance matrix, with rows and columns ordered (xx, yy, xy)
 
-
+"""
 # ======================================================================
 
 if __name__ == '__main__':

@@ -1,10 +1,10 @@
-Image Simulation Recipes
-========================
+DESC Recipes
+=============
 
 A collection of working example scripts for generating simulated LSST images
-given basic inputs, with docstrings interpreted by Sphinx.
+given basic inputs, and for analyzing images using the LSST DM stack. Docstrings are interpreted by Sphinx.
 
-__[GitHub pages website](http://darkenergysciencecollaboration.github.io/ImageSimulationRecipes)__
+__[GitHub pages website](http://darkenergysciencecollaboration.github.io/Recipes)__
 
 ### Help with Recipes
 

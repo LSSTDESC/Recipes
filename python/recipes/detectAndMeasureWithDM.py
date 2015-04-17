@@ -92,6 +92,8 @@ def detectAndMeasureWithDM(display):
     ### Create the output table
     tab = afwTable.SourceTable.make(schema)
 
+    ### uncomments this to see what algorithms have gone into the schema
+    #print schema
     
     ### Process the data
     print "*** running detection task..."
